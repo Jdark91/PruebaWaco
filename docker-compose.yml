@@ -1,0 +1,71 @@
+version: '3'
+services:
+
+### PHP #######################################
+    php_api_prueba:
+        container_name: php-apache-api-prueba
+        #image: php:7.2-apache
+        build: 
+            context: ./
+        volumes:
+            - ${RUTA_PRUEBA_CONTENIDO}:/var/www/html
+        expose:
+            - "9000"
+        environment:
+          - VIRTUAL_HOST=${PRUEBA_DOMAIN}
+
+### Proxy #######################################
+
+    proxy: 
+        image: jwilder/nginx-proxy
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock:ro
+        restart: always
+        privileged: true
+
+### Database #######################################
+
+    db:
+        container_name: db
+        image: mysql:8.0
+        restart: always
+        ports:
+            - "${MYSQL_PORT}:3306"
+        environment:
+            MYSQL_HOST: ${MYSQL_HOST}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_DATABASE: 'laravel'
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        volumes:
+            - ${RUTA_VOLUMEN_MYSQL}:/var/lib/mysql
+
+### Composer ########################################
+
+    composer_prueba:
+        restart: "no"
+        container_name: composer_prueba
+        image: composer/composer
+        command: >
+            sh -c "rm composer.lock && composer install"
+        depends_on:
+            - php_api_prueba
+        working_dir: /var/www/html
+        volumes: 
+            - ${RUTA_PRUEBA_CONTENIDO}:/var/www/html
+        
+### phpmyadmin #######################################
+
+    myadmin:
+        container_name: phpmyadmin
+        image: phpmyadmin
+        restart: always
+        ports:
+            - "${PHPMYADMIN_PORT}:80"
+        depends_on:
+            - db
+        links:
+            - db:db

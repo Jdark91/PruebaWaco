@@ -1,0 +1,18 @@
+#RewriteEngine on
+#RewriteCond %{HTTPS} !=on
+#RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]                      
+
+RewriteEngine on
+# Cambiar sudominio.com por su nombre de dominio
+#RewriteCond %{HTTP_HOST} ^(www.)?catalogos.intelcost.com$
+# Cambiar 'subdirectory' por el nombre del subdirectorio que quiere usar
+RewriteCond %{REQUEST_URI} !^/public/
+# No cambiar estas lineas.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+# Cambiar 'subdirectory' por el nombre del subdirectorio que quiere usar
+RewriteRule ^(.*)$ /public/$1
+# Cambiar sudominio.com por su nombre de dominio
+# Cambiar 'subdirectory' por el nombre del subdirectorio que quiere usar
+
+RewriteRule ^(/)?$ public/index.php [L]
